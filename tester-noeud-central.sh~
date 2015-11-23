@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# ./tester-noeud-central.sh
+#
+# Lance le noeud central et l'enregistre dans l'annuaire RMI.
+#
+# Gwénolé Lecorvé & David Guennec
+# ENSSAT, Université de Rennes 1
+# Novembre 2015
+#
+
+CLASS_PATH=./build/classes
+
+cd $CLASS_PATH
+rmiregistry &
+# cd - > /dev/null
+sleep 0.2
+java -Djava.security.policy=./security.policy -Djava.rmi.server.codebase=file:${CLASS_PATH} -cp ${CLASS_PATH} NoeudCentralSimulateur rmi://localhost:1099/noeud-central
+killall rmiregistry
