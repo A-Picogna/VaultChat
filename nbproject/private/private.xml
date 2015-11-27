@@ -12,7 +12,10 @@
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/users/guennec/Documents/Enseignements/2015-2016/Algo_dist_IMR2/Projet/VaultChat/src/controle/AbriBackend.java</file>
+            <file>file:/home/yserot/NetBeansProjects/VaultChat/src/controle/AbriBackend.java</file>
+            <file>file:/home/yserot/NetBeansProjects/VaultChat/tester-application.sh</file>
+            <file>file:/home/yserot/NetBeansProjects/VaultChat/src/controle/SimplisteControleur.java</file>
+            <file>file:/home/yserot/NetBeansProjects/VaultChat/src/controle/NoeudCentralBackend.java</file>
         </group>
     </open-files>
 </project-private>

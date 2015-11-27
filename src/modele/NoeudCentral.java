@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Observable;
 
 /**
- * Classe qui simule le noeud central du réseau via l'abri entrants et les abris sortants
+ * Classe qui simule le noeud central du réseau via l'abri entrant et les abris sortants
  * @author Gwenole Lecorve
  * @author David Guennec
  */
