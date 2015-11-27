@@ -1,22 +1,10 @@
 *.class
-
-/VaultChat.iml
-/build.xml
-/security.policy
-/manifest.mf
-/README.md
-/out
-/nbproject
-/build
 /.idea
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
 
 # Folder config file
-/demarrer-abri.sh
-/demarrer-noeud-central.sh
-/tester-application.sh
 Desktop.ini
 
 # Recycle Bin used on file shares
