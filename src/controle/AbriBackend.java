@@ -37,7 +37,7 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
     final protected ControleurInterface controleur;
     protected NoeudCentralRemoteInterface noeudCentral;
     
-    protected Annuaire abrisDistants;    // Map faisant le lien entre les url et les interfaces RMI des abris distants
+    protected Annuaire abrisDistants;    // Map faisant le lien entre les url et les interfaces RMI des abris distants // Ne foit pas connaitre l'ensemble de ses abris, juste ses voisins
     protected ArrayList<String> copains; // Les urls des autres membres du groupe de l'abri courant // Pas dans l'annuaire -> imposer la gestion d'une liste locale aux abris pour les groupes
     
     protected Semaphore semaphore;
@@ -184,10 +184,10 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
 
     @Override
     public void enregistrerAbri(String urlDistant, String groupe, AbriRemoteInterface distant) {
-        abrisDistants.ajouterAbriDistant(urlDistant, distant);
         
         if (groupe.equals(abri.donnerGroupe()))
         {
+            abrisDistants.ajouterAbriDistant(urlDistant, distant);
             this.copains.add(urlDistant);
         }
         
@@ -213,9 +213,9 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
     @Override
     public synchronized void supprimerAbri(String urlDistant) {
         System.out.println(url + ": \tOubli de l'abri " + urlDistant);
-        abrisDistants.retirerAbriDistant(urlDistant);
         if (copains.contains(urlDistant))
         {
+            abrisDistants.retirerAbriDistant(urlDistant);
             copains.remove(urlDistant);
         }
     }
