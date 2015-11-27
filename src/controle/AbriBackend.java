@@ -189,9 +189,9 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
         {
             abrisDistants.ajouterAbriDistant(urlDistant, distant);
             this.copains.add(urlDistant);
+            System.out.println(url + ": \tEnregistrement de l'abri " + urlDistant);
         }
-        
-        System.out.println(url + ": \tEnregistrement de l'abri " + urlDistant);
+ 
     }
 
     @Override
@@ -212,9 +212,10 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
 
     @Override
     public synchronized void supprimerAbri(String urlDistant) {
-        System.out.println(url + ": \tOubli de l'abri " + urlDistant);
+        
         if (copains.contains(urlDistant))
         {
+            System.out.println(url + ": \tOubli de l'abri " + urlDistant);
             abrisDistants.retirerAbriDistant(urlDistant);
             copains.remove(urlDistant);
         }

@@ -5,6 +5,8 @@
  */
 package controle;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Gwenole Lecorve
@@ -14,6 +16,7 @@ public class SimplisteControleur implements ControleurInterface {
     
     protected String url;
     protected AbriLocalInterface abri;
+    protected ArrayList<String> controleurs;    // Liste de l'ensemble des contrôleurs en cours d'utilisation
     
     public SimplisteControleur(String url, AbriLocalInterface abri) {
         this.url = url;
@@ -40,11 +43,13 @@ public class SimplisteControleur implements ControleurInterface {
     @Override
     public void enregistrerControleur(String urlDistant, String groupe) {
         System.out.println(this.url + ": \tEnregistrement du controleur " + urlDistant);
+        controleurs.add(urlDistant);
     }
 
     @Override
     public void supprimerControleur(String urlDistant) {
         System.out.println(this.url + ": \tSuppression du controleur " + urlDistant);
+        controleurs.remove(urlDistant);
     }
     
 }
