@@ -67,7 +67,6 @@ public class SimplisteControleur extends UnicastRemoteObject implements Controle
     @Override
     public void finalize() throws AbriException, RemoteException, NotBoundException, MalformedURLException, Throwable {
         try {
-            deconnecterControleur();
             Naming.unbind(url);
         } finally {
             super.finalize();
@@ -114,10 +113,6 @@ public class SimplisteControleur extends UnicastRemoteObject implements Controle
     public void envoyerAcquittement(String urlDistant, int horl) {
         horloge = horloge+1 >= horl+1 ? horloge+1:horl+1;
         this.jetons.put(urlDistant, Boolean.TRUE);
-        if (!this.jetons.containsValue(false)) {
-            this.etat = Etat.SC;
-            signalerAutorisation();
-        }
     }
     
     @Override
@@ -139,10 +134,9 @@ public class SimplisteControleur extends UnicastRemoteObject implements Controle
             }
         }
         this.etat = Etat.ATTENTE;
-        if (!this.jetons.containsValue(false)) {
-            this.etat = Etat.SC;
-            signalerAutorisation();
-        }
+        while (this.jetons.containsValue(false)) {}
+        this.etat = Etat.SC;
+        signalerAutorisation();
     }
 
     @Override

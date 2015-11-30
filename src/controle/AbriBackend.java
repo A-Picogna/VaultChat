@@ -165,6 +165,7 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
             }
         }
         abrisDistants.vider();
+        copains.clear();
         
         // Abri
         abri.deconnecter();
