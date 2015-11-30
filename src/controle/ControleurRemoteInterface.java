@@ -17,9 +17,9 @@ import java.rmi.RemoteException;
  */
 public interface ControleurRemoteInterface extends Remote {
 
-    public void envoyerRequete(int indice, int horloge) throws RemoteException;
+    public void envoyerRequete(String urlDistant, int horloge) throws RemoteException;
     
-    public void envoyerAcquittement(int indice, int horloge) throws RemoteException;
+    public void envoyerAcquittement(String urlDistant, int horloge) throws RemoteException;
     
     void enregistrerControleur(String urlDistant, String groupe) throws NotBoundException, MalformedURLException, RemoteException;
     

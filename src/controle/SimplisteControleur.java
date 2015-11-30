@@ -12,7 +12,9 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -37,8 +39,8 @@ public class SimplisteControleur extends UnicastRemoteObject implements Controle
     protected int horloge;  // Valeur de l'horloge logique
     protected Etat etat;  // Etat de l'abri
     protected int hreq;     // Heure de la requête courante
-    protected boolean[] jetons;  // L'abri a ou non les jetons des autres sites
-    protected boolean[] retardes;   // L'abri a retardé ou non l'acquittement des autres abris
+    protected Map<String, Boolean> jetons;  // L'abri a ou non les jetons des autres sites
+    protected Map<String, Boolean> retardes;   // L'abri a retardé ou non l'acquittement des autres abris
     
     enum Etat {REPOS, ATTENTE, SC} ; 
     
@@ -50,6 +52,9 @@ public class SimplisteControleur extends UnicastRemoteObject implements Controle
         this.horloge = 0;
         this.hreq = 0;
         this.etat = Etat.REPOS;
+        
+        this.jetons = new HashMap();
+        this.retardes = new HashMap();
     }
     
     /**
@@ -70,25 +75,74 @@ public class SimplisteControleur extends UnicastRemoteObject implements Controle
     }
     
     @Override
-    public void envoyerRequete(int indice, int horloge) {
+    public void envoyerRequete(String urlDistant, int horl) {
+        horloge = horloge+1 >= horl+1 ? horloge+1:horl+1;
         
+        if (this.etat == Etat.REPOS) {
+            try {
+                ControleurRemoteInterface o = this.controleursDistants.chercherUrlControleur(urlDistant);
+                o.envoyerAcquittement(url, hreq);
+                this.jetons.put(urlDistant, Boolean.FALSE);
+            }
+            catch(ControleurException ex) {
+                Logger.getLogger(SimplisteControleur.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            catch(RemoteException ex) {
+                Logger.getLogger(SimplisteControleur.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else if (this.etat == Etat.SC || horl >= hreq) {
+            this.retardes.put(urlDistant, Boolean.TRUE);
+        }
+        else {
+            try {
+                ControleurRemoteInterface o = this.controleursDistants.chercherUrlControleur(urlDistant);
+                o.envoyerAcquittement(url, hreq);
+                this.jetons.put(urlDistant, Boolean.FALSE);
+                o.envoyerRequete(url, hreq);
+            }
+            catch(ControleurException ex) {
+                Logger.getLogger(SimplisteControleur.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            catch(RemoteException ex) {
+                Logger.getLogger(SimplisteControleur.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
     
     @Override
-    public void envoyerAcquittement(int indice, int horloge) {
-        
+    public void envoyerAcquittement(String urlDistant, int horl) {
+        horloge = horloge+1 >= horl+1 ? horloge+1:horl+1;
+        this.jetons.put(urlDistant, Boolean.TRUE);
+        if (!this.jetons.containsValue(false)) {
+            this.etat = Etat.SC;
+            signalerAutorisation();
+        }
     }
     
     @Override
     public void demanderSectionCritique() {
         System.out.println(this.url + ": \tDemande de section critique enregistrée");
-        /*this.hreq = horloge;
-        for (int i=0;i<this.controleurs.size();i++){
-            this.retardes[i] = false;
-            if (this.jetons[i] == false)
-                ;//envoyer
-        }*/
-        signalerAutorisation();
+        this.hreq = horloge;
+        
+        Map<String, ControleurRemoteInterface> contrd = this.controleursDistants.getControleursDistants();
+        for (Map.Entry<String, ControleurRemoteInterface> entry : contrd.entrySet())
+        {
+            //this.retardes.put(entry.getKey(), Boolean.FALSE);
+            if (!this.jetons.get(entry.getKey())) {
+                try {
+                    entry.getValue().envoyerRequete(url, hreq);
+                }
+                catch(RemoteException ex) {
+                    Logger.getLogger(SimplisteControleur.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        this.etat = Etat.ATTENTE;
+        if (!this.jetons.containsValue(false)) {
+            this.etat = Etat.SC;
+            signalerAutorisation();
+        }
     }
 
     @Override
@@ -100,27 +154,47 @@ public class SimplisteControleur extends UnicastRemoteObject implements Controle
     @Override
     public void quitterSectionCritique() {
         System.out.println(this.url + ": \tFin de section critique");
+        
+        Map<String, ControleurRemoteInterface> contrd = this.controleursDistants.getControleursDistants();
+        for (Map.Entry<String, ControleurRemoteInterface> entry : contrd.entrySet())
+        {
+            if (this.retardes.get(entry.getKey())) {
+                try {
+                    entry.getValue().envoyerAcquittement(url, hreq);
+                    this.jetons.put(entry.getKey(), Boolean.FALSE);
+                    this.retardes.put(entry.getKey(), Boolean.FALSE);
+                }
+                catch(RemoteException ex) {
+                    Logger.getLogger(SimplisteControleur.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        this.etat = Etat.REPOS;
     }
     
     @Override
     public void enregistrerControleur(String urlDistant, String groupe) throws NotBoundException, MalformedURLException, RemoteException {
+        this.jetons.put(urlDistant, Boolean.FALSE);
+        this.retardes.put(urlDistant, Boolean.FALSE);
+        
         ControleurRemoteInterface o = (ControleurRemoteInterface) Naming.lookup(urlDistant);
         controleursDistants.ajouterControleurDistant(urlDistant, o);
         this.controleurs.add(urlDistant);
         System.out.println(this.url + ": \tEnregistrement du controleur " + urlDistant);
         
+        // Indice de l'abri inutile
+        /*
         Pattern pattern = Pattern.compile("^.*abri([0-9]*).*$");
         Matcher matcher = pattern.matcher(urlDistant);
         if (matcher.find())
             matcher.group(1);
+        */
     }
 
     @Override
     public void supprimerControleur(String urlDistant) throws RemoteException {
         
         System.out.println(url + ": \tOubli du controleur " + urlDistant);
-        controleursDistants.retirerControleurDistant(urlDistant);
-        controleurs.remove(urlDistant);
         
     }
     
@@ -147,10 +221,8 @@ public class SimplisteControleur extends UnicastRemoteObject implements Controle
     
     @Override
     public void deconnecterControleur() throws ControleurException, RemoteException, MalformedURLException, NotBoundException {
-        controleursDistants.vider();
-        
-        // Annuaire RMI
-        Naming.unbind(url);
+        // envoyer tous les jetons
+        // pas obligé
     }
     
 }

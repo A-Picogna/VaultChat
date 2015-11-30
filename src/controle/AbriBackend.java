@@ -51,6 +51,22 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
         
         this.abri = _abri;
         this.controleur = new SimplisteControleur(controleurUrl, this);
+        try {
+            this.controleur.connecterControleur();
+        }
+        catch(ControleurException ex) {
+            Logger.getLogger(AbriBackend.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch(NotBoundException ex) {
+            Logger.getLogger(AbriBackend.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch(MalformedURLException ex) {
+            Logger.getLogger(AbriBackend.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch(RemoteException ex) {
+            Logger.getLogger(AbriBackend.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         this.noeudCentral = null;
         
         this.abrisDistants = new Annuaire();
@@ -95,7 +111,6 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
     public void connecterAbri() throws AbriException, ControleurException, RemoteException, MalformedURLException, NotBoundException {
         // Enregistrer dans l'annuaire RMI
         Naming.rebind(url, (AbriRemoteInterface) this);
-        this.controleur.connecterControleur();
         
         // Enregistrement de tous les autres abris
         // et notification a tous les autres abris
