@@ -20,6 +20,7 @@ import modele.Annuaire;
 import modele.Abri;
 import modele.Message;
 import modele.Adresses;
+import modele.ControleurException;
 import modele.NoeudCentralException;
 
 /**
@@ -91,9 +92,10 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
     }
 
     @Override
-    public void connecterAbri() throws AbriException, RemoteException, MalformedURLException, NotBoundException {
+    public void connecterAbri() throws AbriException, ControleurException, RemoteException, MalformedURLException, NotBoundException {
         // Enregistrer dans l'annuaire RMI
         Naming.rebind(url, (AbriRemoteInterface) this);
+        this.controleur.connecterControleur();
         
         // Enregistrement de tous les autres abris
         // et notification a tous les autres abris
@@ -126,16 +128,18 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
     /**
      *
      * @throws AbriException
+     * @throws modele.ControleurException
      * @throws RemoteException
      * @throws MalformedURLException
      * @throws NotBoundException
      */
     @Override
-    public void deconnecterAbri() throws AbriException, RemoteException, MalformedURLException, NotBoundException {
+    public void deconnecterAbri() throws AbriException, ControleurException, RemoteException, MalformedURLException, NotBoundException {
         // noeudCentral
         noeudCentral.supprimerAbri(url);
         noeudCentralUrl = "";
         noeudCentral = null;
+        this.controleur.deconnecterControleur();
         
         // Autres abris
         for (AbriRemoteInterface distant : abrisDistants.getAbrisDistants().values()) {

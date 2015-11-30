@@ -6,6 +6,7 @@
 package modele;
 
 import controle.AbriRemoteInterface;
+import controle.ControleurRemoteInterface;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
@@ -18,17 +19,28 @@ import java.util.Observable;
 public class Annuaire extends Observable {
     
     protected Map<String, AbriRemoteInterface> abrisDistants;
+    protected Map<String, ControleurRemoteInterface> controleursDistants;
     
     public Annuaire() {
         abrisDistants = new HashMap();
+        controleursDistants = new HashMap();
     }
     
     public Map<String, AbriRemoteInterface>getAbrisDistants() {
         return abrisDistants;
     }
     
+    public Map<String, ControleurRemoteInterface>getControleursDistants() {
+        return controleursDistants;
+    }
+    
     public void ajouterAbriDistant(String url, AbriRemoteInterface abri) {
         abrisDistants.put(url, abri);
+        notifierObservateurs();
+    }
+    
+    public void ajouterControleurDistant(String url, ControleurRemoteInterface controleur) {
+        controleursDistants.put(url, controleur);
         notifierObservateurs();
     }
     

@@ -14,6 +14,7 @@ public class Adresses {
     
     private static final String noeud = "localhost"; // localhost // Par défaut, le simulateur lance tous les sites sur la boucle locale
     private static final String abri = "localhost"; // localhost
+    private static final String controleur = "localhost"; // localhost
     private static final int port = 2020;
     
     Adresses(){}
@@ -26,6 +27,11 @@ public class Adresses {
     public static String archetypeAdresseAbri()
     {
         return ("rmi://"+Adresses.abri+":"+Adresses.port+"/");        
+    }
+    
+    public static String archetypeAdresseControleur()
+    {
+        return ("rmi://"+Adresses.controleur+":"+Adresses.port+"/");        
     }
     
 }

@@ -1,5 +1,10 @@
 package controle;
 
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import modele.ControleurException;
+
 /**
  * Interface definissant les fonctionnalites attendues d'un controleur pour le projet VaultChat
  * @author Gwenole Lecorve
@@ -35,4 +40,21 @@ public interface ControleurInterface {
 	 */
 	void supprimerControleur(String urlDistant);
 	
+        /**
+	 * Bind l'URL du controleur
+         * @throws modele.ControleurException
+         * @throws java.rmi.RemoteException
+         * @throws java.net.MalformedURLException
+         * @throws java.rmi.NotBoundException
+	 */
+        void connecterControleur() throws ControleurException, RemoteException, MalformedURLException, NotBoundException;
+        
+        /**
+	 * Unbind l'URL du controleur
+         * @throws modele.ControleurException
+         * @throws java.rmi.RemoteException
+         * @throws java.net.MalformedURLException
+         * @throws java.rmi.NotBoundException
+	 */
+        void deconnecterControleur() throws ControleurException, RemoteException, MalformedURLException, NotBoundException;
 }
