@@ -82,12 +82,12 @@ public class SimplisteControleur extends UnicastRemoteObject implements Controle
     @Override
     public void demanderSectionCritique() {
         System.out.println(this.url + ": \tDemande de section critique enregistrée");
-        this.hreq = horloge;
+        /*this.hreq = horloge;
         for (int i=0;i<this.controleurs.size();i++){
             this.retardes[i] = false;
             if (this.jetons[i] == false)
                 ;//envoyer
-        }
+        }*/
         signalerAutorisation();
     }
 
@@ -101,11 +101,14 @@ public class SimplisteControleur extends UnicastRemoteObject implements Controle
     public void quitterSectionCritique() {
         System.out.println(this.url + ": \tFin de section critique");
     }
-
+    
     @Override
-    public void enregistrerControleur(String urlDistant, String groupe) {
+    public void enregistrerControleur(String urlDistant, String groupe) throws NotBoundException, MalformedURLException, RemoteException {
+        ControleurRemoteInterface o = (ControleurRemoteInterface) Naming.lookup(urlDistant);
+        controleursDistants.ajouterControleurDistant(urlDistant, o);
+        this.controleurs.add(urlDistant);
         System.out.println(this.url + ": \tEnregistrement du controleur " + urlDistant);
-        controleurs.add(urlDistant);
+        
         Pattern pattern = Pattern.compile("^.*abri([0-9]*).*$");
         Matcher matcher = pattern.matcher(urlDistant);
         if (matcher.find())
@@ -113,9 +116,12 @@ public class SimplisteControleur extends UnicastRemoteObject implements Controle
     }
 
     @Override
-    public void supprimerControleur(String urlDistant) {
-        System.out.println(this.url + ": \tSuppression du controleur " + urlDistant);
+    public void supprimerControleur(String urlDistant) throws RemoteException {
+        
+        System.out.println(url + ": \tOubli du controleur " + urlDistant);
+        controleursDistants.retirerControleurDistant(urlDistant);
         controleurs.remove(urlDistant);
+        
     }
     
     @Override
@@ -141,15 +147,7 @@ public class SimplisteControleur extends UnicastRemoteObject implements Controle
     
     @Override
     public void deconnecterControleur() throws ControleurException, RemoteException, MalformedURLException, NotBoundException {
-        // Autres abris
-        /*for (ControleurRemoteInterface distant : controleursDistants.getAbrisDistants().values()) {
-            try {
-                distant.supprimerAbri(url, controleurUrl);
-            } catch (RemoteException ex) {
-                Logger.getLogger(AbriBackend.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        controleursDistants.vider();*/
+        controleursDistants.vider();
         
         // Annuaire RMI
         Naming.unbind(url);

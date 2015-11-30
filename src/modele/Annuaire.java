@@ -41,16 +41,20 @@ public class Annuaire extends Observable {
     
     public void ajouterControleurDistant(String url, ControleurRemoteInterface controleur) {
         controleursDistants.put(url, controleur);
-        notifierObservateurs();
     }
     
     public void retirerAbriDistant(String url) {
         abrisDistants.remove(url);
         notifierObservateurs();
     }
+    
+    public void retirerControleurDistant(String url) {
+        controleursDistants.remove(url);
+    }
 
     public void vider() {
         abrisDistants.clear();
+        controleursDistants.clear();
         notifierObservateurs();
     }
 
@@ -63,6 +67,12 @@ public class Annuaire extends Observable {
         AbriRemoteInterface abri = abrisDistants.get(urlDistant);
         if (abri == null) { throw new AbriException("Abri " + urlDistant + " introuvable dans l'annuaire local."); }
         else { return abri; }
+    }
+    
+    public ControleurRemoteInterface chercherUrlControleur(String urlDistant) throws ControleurException {
+        ControleurRemoteInterface controleur = controleursDistants.get(urlDistant);
+        if (controleur == null) { throw new ControleurException("Controleur " + urlDistant + " introuvable dans l'annuaire local."); }
+        else { return controleur; }
     }
     
 }

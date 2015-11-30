@@ -242,12 +242,12 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
     }
 
     @Override
-    public synchronized void enregistrerControleur(String urlDistante, String groupe) {
+    public synchronized void enregistrerControleur(String urlDistante, String groupe) throws NotBoundException, MalformedURLException, RemoteException {
         controleur.enregistrerControleur(urlDistante, groupe);
     }
 
     @Override
-    public synchronized void supprimerControleur(String urlDistante) {
+    public synchronized void supprimerControleur(String urlDistante) throws RemoteException {
         controleur.supprimerControleur(urlDistante);
     }
 

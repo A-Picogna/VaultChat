@@ -31,14 +31,17 @@ public interface ControleurInterface {
 	 * Enregistre l'URL d'un controleur distant
 	 * @param urlDistant l'URL a memoriser
          * @param groupe le groupe auquel appartient l'abri
+         * @throws java.rmi.NotBoundException
+         * @throws java.net.MalformedURLException
+         * @throws java.rmi.RemoteException
 	 */
-	void enregistrerControleur(String urlDistant, String groupe);
+	void enregistrerControleur(String urlDistant, String groupe) throws NotBoundException, MalformedURLException, RemoteException;
 	
 	/**
 	 * Oublie l'URL d'un controleur distant
 	 * @param urlDistant l'URL a oublier
 	 */
-	void supprimerControleur(String urlDistant);
+	void supprimerControleur(String urlDistant) throws RemoteException;
 	
         /**
 	 * Bind l'URL du controleur
