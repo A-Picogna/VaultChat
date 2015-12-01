@@ -108,7 +108,7 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
     }
 
     @Override
-    public void connecterAbri() throws AbriException, ControleurException, RemoteException, MalformedURLException, NotBoundException {
+    public void connecterAbri() throws NoeudCentralException, AbriException, ControleurException, RemoteException, MalformedURLException, NotBoundException {
         // Enregistrer dans l'annuaire RMI
         Naming.rebind(url, (AbriRemoteInterface) this);
         
@@ -142,6 +142,8 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
 
     /**
      *
+     * @throws modele.NoeudCentralException
+     * @throws java.lang.InterruptedException
      * @throws AbriException
      * @throws modele.ControleurException
      * @throws RemoteException
@@ -149,7 +151,12 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
      * @throws NotBoundException
      */
     @Override
-    public void deconnecterAbri() throws AbriException, ControleurException, RemoteException, MalformedURLException, NotBoundException {
+    public void deconnecterAbri() throws NoeudCentralException, InterruptedException, AbriException, ControleurException, RemoteException, MalformedURLException, NotBoundException {
+        controleur.demanderSectionCritique();
+        semaphore.acquire();
+        System.out.println(url + ": \tEntree en section critique");
+        noeudCentral.modifierAiguillage(url, copains);
+        
         // noeudCentral
         noeudCentral.supprimerAbri(url);
         noeudCentralUrl = "";
@@ -157,13 +164,13 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
         this.controleur.deconnecterControleur();
         
         // Autres abris
-        for (AbriRemoteInterface distant : abrisDistants.getAbrisDistants().values()) {
+        /*for (AbriRemoteInterface distant : abrisDistants.getAbrisDistants().values()) {
             try {
                 distant.supprimerAbri(url, controleurUrl);
             } catch (RemoteException ex) {
                 Logger.getLogger(AbriBackend.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
+        }*/
         abrisDistants.vider();
         copains.clear();
         
@@ -172,6 +179,9 @@ public class AbriBackend extends UnicastRemoteObject implements AbriLocalInterfa
         
         // Annuaire RMI
         Naming.unbind(url);
+        
+        controleur.quitterSectionCritique();
+        System.out.println(url + ": \tSortie de la section critique");
     }
 
     /**

@@ -91,15 +91,37 @@ public class NoeudCentralBackend extends UnicastRemoteObject implements NoeudCen
 
     @Override
     public synchronized void enregisterAbri(String urlAbriDistant) throws RemoteException, NotBoundException, MalformedURLException {
+        
         System.out.println(url + ": \tEnregistrement de l'abri dans l'annuaire " + urlAbriDistant);
         AbriRemoteInterface abriDistant = (AbriRemoteInterface) Naming.lookup(urlAbriDistant);
         abris.ajouterAbriDistant(urlAbriDistant, abriDistant);
+        
     }
 
     @Override
-    public synchronized void supprimerAbri(String urlAbriDistant) throws RemoteException {
+    public synchronized void supprimerAbri(String urlAbriDistant) throws AbriException, NoeudCentralException, RemoteException {
+        
+        try {
+            noeudCentral.demarrerTransmission();
+                        
+            ArrayList<String> abrisCible = noeudCentral.getVersUrl();
+            Iterator<String> itr = abrisCible.iterator();
+            
+            while (itr.hasNext()) {
+                AbriRemoteInterface c = abris.chercherUrl(itr.next());
+                c.supprimerAbri(urlAbriDistant, "");
+            }
+        } catch (RemoteException ex) {
+            throw ex;
+        } catch (AbriException ex) {
+            throw ex;
+        } finally {
+            noeudCentral.stopperTransmission();
+        }
+        
+        
         System.out.println(url + ": \tSuppression de l'abri de l'annuaire " + urlAbriDistant);
-        abris.retirerAbriDistant(urlAbriDistant);
+        //abris.retirerAbriDistant(urlAbriDistant);
     }
 
 }
